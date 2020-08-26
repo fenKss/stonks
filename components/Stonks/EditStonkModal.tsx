@@ -5,63 +5,46 @@ import {StonkType} from "../../types";
 type Props = {
     modalVisible: boolean,
     setModalVisible: (isVisible: boolean) => void,
-    stonk: StonkType,
-    editStonk:()=>void
+    editStonk: () => void
+    deleteStonk: () => void,
+    stonk: StonkType
 }
 const EditStonkModal = (props: Props) => {
-    let {setModalVisible, modalVisible, stonk, editStonk} = props;
-    const [title, setTitle] = useState(stonk.title);
-    const [description, setDescription] = useState(stonk.description);
-    const [summ, setSumm] = useState(+stonk.summ || '');
+    let {setModalVisible, modalVisible, editStonk, deleteStonk, stonk} = props;
+    const [myWidth, setWidth] = useState(1);
+    const [myHeight, setHeight] = useState(1);
 
-    const onTitleChange = (text: string) => {
-        stonk.title = text;
-        setTitle(text);
-    }
-    const onDescriptionChange = (text: string) => {
-        stonk.description = text;
-        setDescription(text);
-    }
-    const onSummChange = (text: string) => {
-        let sum =  +text;
-        if (text === `` || !isNaN(sum)){
-            setSumm(text);
-            stonk.summ = sum;
-        }else if(text === "-"){
-            stonk.summ = 0;
-            setSumm(text);
-        }
+    const onLayout = event => {
+        const {width, height} = event.nativeEvent.layout;
 
-    }
-
+        setWidth(width);
+        setHeight(height);
+    };
 
     return (
         <Modal
-            animationType="slide"
+            // animationType="slide"
             transparent={true}
             visible={props.modalVisible}
         >
             <View style={styles.container}>
                 <View style={styles.shadow} onTouchStart={() => {
                     setModalVisible(!modalVisible);
-                }}/>
-                <View style={styles.content}>
-                    <View style={styles.top}>
-                        <Text style={styles.title}>Hello World!</Text>
-                        <TouchableHighlight
-                            onPress={() => {
-                                setModalVisible(!modalVisible);
-                            }}
-                        >
-                            <Text style={styles.close}>X</Text>
-                        </TouchableHighlight>
-                    </View>
+                }}>
+
+                </View>
+                <View onLayout={onLayout} style={{
+                    ...styles.content,
+                    translateX: -(myWidth / 2),
+                    translateY: -(myHeight / 2),
+                }}>
+                    <View style={styles.top}><Text style={styles.summ}> {stonk.title}</Text></View>
                     <View style={styles.mid}>
-                        <TextInput style={styles.titleInput} value={title}  placeholder={'Название'} onChangeText={onTitleChange}/>
-                        <TextInput style={styles.description} value={description}  placeholder={'Описание'} onChangeText={onDescriptionChange}/>
-                        <TextInput keyboardType={"numeric"} style={styles.description} value={summ.toString()}  placeholder={'Сумма'} onChangeText={onSummChange} />
                         <TouchableHighlight onPress={editStonk} style={styles.button}>
-                            <Text>{stonk.id ? "Изменить"  : "Добавить"}</Text>
+                            <Text>Изменить</Text>
+                        </TouchableHighlight>
+                        <TouchableHighlight onPress={deleteStonk} style={styles.button}>
+                            <Text>Удалить</Text>
                         </TouchableHighlight>
                     </View>
                 </View>
@@ -81,16 +64,20 @@ const styles = StyleSheet.create({
         flex: 1,
         flexGrow: 1,
         flexShrink: 1,
-        backgroundColor: "rgba(0,0,0,0.3)"
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.8)"
     },
     content: {
+        padding: 10,
         backgroundColor: "#1d1d1d",
         borderWidth: 1,
         borderTopRightRadius: 8,
         borderTopLeftRadius: 8,
         position: "absolute",
-        bottom: 0,
-        width: "100%",
+        top: "50%",
+        left: "50%",
+
     },
     date: {
         fontSize: 10,
@@ -101,14 +88,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: "#fff"
     },
-    top: {
-        flex: 1,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingLeft: 10,
-        paddingRight: 10
-    },
+    top: {},
     close: {
         fontSize: 20,
         color: "#fff",
@@ -117,29 +97,29 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: "#fff",
     },
-    mid:{
-        marginTop:10,
-        padding:10,
-        flex:1,
-        alignItems:"flex-start",
+    mid: {
+        // marginTop:10,
+        // padding:10,
+        // flex:1,
+        // alignItems:"flex-start",
     },
-    titleInput:{
+    titleInput: {
         fontSize: 15,
-        padding:10,
+        padding: 10,
         color: "#fff",
-        width:"100%"
+        width: "100%"
     },
 
     description: {
-        color:"#fff",
-        padding:10,
-        width:"100%"
+        color: "#fff",
+        padding: 10,
+        width: "100%"
     },
-    button:{
-        marginTop:20,
-        color:"#fff",
-        padding:10,
-        backgroundColor:"#fff",
+    button: {
+        marginTop: 20,
+        color: "#fff",
+        padding: 10,
+        backgroundColor: "#fff",
     }
 });
 

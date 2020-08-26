@@ -7,11 +7,12 @@ type Item = {
     item: StonkType
 }
 type Props = {
-    stonks:StonkType[]
+    stonks:StonkType[],
+    onHoldHandler:(stonk:StonkType)=>void
 }
 const Stonks = (props: Props) => {
     const renderItem = ((item: Item) => {
-        return <Stonk {...item.item}/>
+        return <Stonk stonk={item.item}  onHoldHandler={props.onHoldHandler}/>
     }
 )
     ;

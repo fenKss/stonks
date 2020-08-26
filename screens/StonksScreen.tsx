@@ -5,39 +5,85 @@ import EditScreenInfo from '../components/EditScreenInfo';
 import {Text, View} from '../components/Themed';
 import {useState} from "react";
 import Stonks from "../components/Stonks/Stonks";
-import EditStonkModal from "../components/Stonks/EditStonkModal";
+import ChangeStonkModal from "../components/Stonks/ChangeStonkModal";
 import {StonkType} from "../types";
+import EditStonkModal from "../components/Stonks/EditStonkModal";
 
 export default function StonksScreen() {
-    const [modalVisible, setModalVisible] = useState(false);
-    const onButtonClick = () => {
-        setModalVisible(true);
+    const [changeModalVisible, setChangeModalVisible] = useState(false);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+
+
+    const [stonks, setStonks] = useState([
+        {
+            id: 1,
+            description: 'Desc',
+            title: 'Title',
+            summ: 1220,
+            created_at: Date.now().toLocaleString()
+        },
+        {
+            id: 2,
+            description: 'Desc2',
+            title: 'Title2',
+            summ: 122011,
+            created_at: Date.now().toLocaleString()
+        }
+    ]);
+    const initStonk = {
+        id: 0,
+        description: '',
+        title: '',
+        summ: 0,
+        created_at: Date.now().toLocaleString()
     }
-    const [stonks, setStonks] = useState([]);
+    const [newStonk, changeNewStonk] = useState({...initStonk});
+    const [selectedStonk, changeSelectedStonk] = useState({...initStonk});
 
-    const [newStonk, changeNewStonk] = useState({
-        id:0,
-        description:'',
-        title:'',
-        summ:0,
-        created_at:Date.now().toLocaleString()
-    })
-
-    const editStonk = (stonk:StonkType) =>{
-        if (!stonk.id){
+    const editStonk = (stonk: StonkType) => {
+        if (!stonk.title || !stonk.summ) {
+            Alert.alert('Error', `Укажите все данные`);
+            return;
+        }
+        if (!stonk.id) {
             changeNewStonk(newStonk);
+            // @ts-ignore
+            setStonks([...stonks, newStonk])
+            changeNewStonk({...initStonk});
         }
     }
 
-
+    const onButtonClick = () => {
+        setChangeModalVisible(true);
+        changeNewStonk({...initStonk});
+    }
+    const setupEditStonk = () => {
+        changeNewStonk(selectedStonk);
+        setEditModalVisible(false);
+        setChangeModalVisible(true);
+    }
+    const deleteStonk = () => {
+            const newStonks = stonks.filter(e => e.id != selectedStonk.id);
+            setStonks([...newStonks]);
+            setEditModalVisible(false);
+    }
+    const onHoldHandler = (stonk: StonkType) => {
+        changeSelectedStonk(stonk);
+        setEditModalVisible(true);
+    }
     return (
         <View style={styles.container}>
             <View style={styles.top}>
                 <Text style={styles.title}>Stonks</Text>
                 <Text style={styles.button} onPress={onButtonClick}>+</Text>
             </View>
-            <EditStonkModal stonk={newStonk} modalVisible={modalVisible} setModalVisible={setModalVisible} editStonk={()=>{editStonk(newStonk)}}/>
-            <Stonks stonks={stonks}/>
+            <ChangeStonkModal stonk={newStonk} changeModalVisible={changeModalVisible}
+                              setChangeModalVisible={setChangeModalVisible} editStonk={() => {
+                editStonk(newStonk)
+            }}/>
+            <EditStonkModal stonk={selectedStonk} modalVisible={editModalVisible} setModalVisible={setEditModalVisible}
+                            editStonk={setupEditStonk} deleteStonk={deleteStonk}/>
+            <Stonks stonks={stonks} onHoldHandler={onHoldHandler}/>
         </View>
     );
 }
