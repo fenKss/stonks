@@ -17,16 +17,16 @@ export default function StonksScreen() {
     const [stonks, setStonks] = useState([
         {
             id: 1,
-            description: 'Desc',
-            title: 'Title',
+            description: 'Наконец то',
+            title: 'Зарплата',
             summ: 1220,
             created_at: Date.now().toLocaleString()
         },
         {
             id: 2,
-            description: 'Desc2',
-            title: 'Title2',
-            summ: 122011,
+            description: 'Почему бы и нет?',
+            title: 'Купил шавуху',
+            summ: -122011,
             created_at: Date.now().toLocaleString()
         }
     ]);
