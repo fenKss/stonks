@@ -1,0 +1,146 @@
+import React, {useState} from "react";
+import {View, Text, StyleSheet, Modal, Alert, TouchableHighlight, TextInput} from "react-native";
+import {StonkType} from "../../types";
+
+type Props = {
+    modalVisible: boolean,
+    setModalVisible: (isVisible: boolean) => void,
+    stonk: StonkType,
+    editStonk:()=>void
+}
+const EditStonkModal = (props: Props) => {
+    let {setModalVisible, modalVisible, stonk, editStonk} = props;
+    const [title, setTitle] = useState(stonk.title);
+    const [description, setDescription] = useState(stonk.description);
+    const [summ, setSumm] = useState(+stonk.summ || '');
+
+    const onTitleChange = (text: string) => {
+        stonk.title = text;
+        setTitle(text);
+    }
+    const onDescriptionChange = (text: string) => {
+        stonk.description = text;
+        setDescription(text);
+    }
+    const onSummChange = (text: string) => {
+        let sum =  +text;
+        if (text === `` || !isNaN(sum)){
+            setSumm(text);
+            stonk.summ = sum;
+        }else if(text === "-"){
+            stonk.summ = 0;
+            setSumm(text);
+        }
+
+    }
+
+
+    return (
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={props.modalVisible}
+        >
+            <View style={styles.container}>
+                <View style={styles.shadow} onTouchStart={() => {
+                    setModalVisible(!modalVisible);
+                }}/>
+                <View style={styles.content}>
+                    <View style={styles.top}>
+                        <Text style={styles.title}>Hello World!</Text>
+                        <TouchableHighlight
+                            onPress={() => {
+                                setModalVisible(!modalVisible);
+                            }}
+                        >
+                            <Text style={styles.close}>X</Text>
+                        </TouchableHighlight>
+                    </View>
+                    <View style={styles.mid}>
+                        <TextInput style={styles.titleInput} value={title}  placeholder={'Название'} onChangeText={onTitleChange}/>
+                        <TextInput style={styles.description} value={description}  placeholder={'Описание'} onChangeText={onDescriptionChange}/>
+                        <TextInput keyboardType={"numeric"} style={styles.description} value={summ.toString()}  placeholder={'Сумма'} onChangeText={onSummChange} />
+                        <TouchableHighlight onPress={editStonk} style={styles.button}>
+                            <Text>{stonk.id ? "Изменить"  : "Добавить"}</Text>
+                        </TouchableHighlight>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    )
+};
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        flexDirection: "column",
+        justifyContent: "flex-end",
+    },
+    shadow: {
+        width: "100%",
+        height: "100%",
+        flex: 1,
+        flexGrow: 1,
+        flexShrink: 1,
+        backgroundColor: "rgba(0,0,0,0.3)"
+    },
+    content: {
+        backgroundColor: "#1d1d1d",
+        borderWidth: 1,
+        borderTopRightRadius: 8,
+        borderTopLeftRadius: 8,
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+    },
+    date: {
+        fontSize: 10,
+        color: "grey"
+    },
+    summ: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: "#fff"
+    },
+    top: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingLeft: 10,
+        paddingRight: 10
+    },
+    close: {
+        fontSize: 20,
+        color: "#fff",
+    },
+    title: {
+        fontSize: 20,
+        color: "#fff",
+    },
+    mid:{
+        marginTop:10,
+        padding:10,
+        flex:1,
+        alignItems:"flex-start",
+    },
+    titleInput:{
+        fontSize: 15,
+        padding:10,
+        color: "#fff",
+        width:"100%"
+    },
+
+    description: {
+        color:"#fff",
+        padding:10,
+        width:"100%"
+    },
+    button:{
+        marginTop:20,
+        color:"#fff",
+        padding:10,
+        backgroundColor:"#fff",
+    }
+});
+
+export default EditStonkModal;

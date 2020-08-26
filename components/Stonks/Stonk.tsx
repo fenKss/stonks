@@ -1,11 +1,11 @@
 import React from "react";
 import {View, Text, StyleSheet} from "react-native";
+import {StonkType} from "../../types";
 
-const Stonk = (props: any) => {
-    // @ts-ignore
+const Stonk = (props: StonkType) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.date}>{props.date}</Text>
+            <Text style={styles.date}>{props.created_at}</Text>
             <Text style={styles.summ}>{props.summ}</Text>
         </View>
     )
