@@ -1,15 +1,16 @@
 import React, {useEffect, useState} from "react";
-import {Modal, StyleSheet, Text, TextInput, TouchableHighlight, View} from "react-native";
+import {ActivityIndicator, Modal, StyleSheet, Text, TextInput, TouchableHighlight, View} from "react-native";
 import {StonkType} from "../../types";
 
 type Props = {
     changeModalVisible: boolean,
     setChangeModalVisible: (isVisible: boolean) => void,
     stonk: StonkType,
-    editStonk: () => void
+    editStonk: () => void,
+    isFetching: boolean
 }
 const ChangeStonkModal = (props: Props) => {
-    let {setChangeModalVisible, changeModalVisible, stonk, editStonk} = props;
+    let {setChangeModalVisible, changeModalVisible, stonk, editStonk, isFetching} = props;
     const [title, setTitle] = useState(stonk.title);
     const [description, setDescription] = useState(stonk.description);
     const [summ, setSumm] = useState(+stonk.summ ?? '');
@@ -41,6 +42,24 @@ const ChangeStonkModal = (props: Props) => {
         setDescription(stonk.description);
         setTitle(stonk.title);
     }, [stonk]);
+    const Content = () =>
+        isFetching ?
+
+            <ActivityIndicator size="large" color="#00ff00"/>
+
+            :
+            <>
+                <TextInput style={styles.titleInput} value={title} placeholder={'Название'}
+                           onChangeText={onTitleChange}/>
+                <TextInput style={styles.description} value={description} placeholder={'Описание'}
+                           onChangeText={onDescriptionChange}/>
+                <TextInput keyboardType={"numeric"} style={styles.description} value={summ.toString()}
+                           placeholder={'Сумма'} onChangeText={onSummChange}/>
+                <TouchableHighlight onPress={editStonk} style={styles.button}>
+                    <Text>{stonk.id ? "Изменить" : "Добавить"}</Text>
+                </TouchableHighlight>
+            </>
+
 
     return (
         <Modal
@@ -64,15 +83,7 @@ const ChangeStonkModal = (props: Props) => {
                         </TouchableHighlight>
                     </View>
                     <View style={styles.mid}>
-                        <TextInput style={styles.titleInput} value={title} placeholder={'Название'}
-                                   onChangeText={onTitleChange}/>
-                        <TextInput style={styles.description} value={description} placeholder={'Описание'}
-                                   onChangeText={onDescriptionChange}/>
-                        <TextInput keyboardType={"numeric"} style={styles.description} value={summ.toString()}
-                                   placeholder={'Сумма'} onChangeText={onSummChange}/>
-                        <TouchableHighlight onPress={editStonk} style={styles.button}>
-                            <Text>{stonk.id ? "Изменить" : "Добавить"}</Text>
-                        </TouchableHighlight>
+                        <Content/>
                     </View>
                 </View>
             </View>

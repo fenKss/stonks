@@ -9,11 +9,11 @@ export type BottomTabParamList = {
 };
 
 export type TabOneParamList = {
-    TabOneScreen: undefined;
+    Stonks: undefined;
 };
 
 export type TabTwoParamList = {
-    TabTwoScreen: undefined;
+    Debts: undefined;
 };
 export type StonkType = {
     id: number,

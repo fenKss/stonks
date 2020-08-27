@@ -1,5 +1,5 @@
 import Stonk from "./Stonk";
-import {View, StyleSheet, ScrollView, FlatList} from "react-native";
+import {FlatList, StyleSheet} from "react-native";
 import * as React from "react";
 import {StonkType} from "../../types";
 
@@ -13,25 +13,17 @@ type Props = {
     onRefresh:()=>void,
 }
 const Stonks = (props: Props) => {
-    const renderItem = ((item: Item) => {
-        return <Stonk stonk={item.item}  onHoldHandler={props.onHoldHandler}/>
-    }
-)
-    ;
-
+    const renderItem = ((item: Item) => <Stonk stonk={item.item} onHoldHandler={props.onHoldHandler}/>);
     return (
         <FlatList style={styles.stonks}
                   data={props.stonks}
                   renderItem={renderItem}
                   refreshing={props.isRefreshing}
                   onRefresh={props.onRefresh}
-                 // @ts-ignore
-                  keyExtractor={item => item.id}
+                  keyExtractor={item => item.id.toString()}
         />
-
     )
 }
-
 
 export default Stonks;
 

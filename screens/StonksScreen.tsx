@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, StyleSheet} from 'react-native';
+import {Alert, StyleSheet} from 'react-native';
 import {Text, View} from '../components/Themed';
 import Stonks from "../components/Stonks/Stonks";
 import ChangeStonkModal from "../components/Stonks/ChangeStonkModal";
@@ -16,9 +16,18 @@ export default function StonksScreen() {
             title: '',
             summ: 0,
             created_at: Date.now().toLocaleString()
-        };
+        },
+        initProfit = {
+            plus: 0,
+            minus: 0,
+            total: 0
+        }
 
-    const [changeModalVisible, setChangeModalVisible] = useState(false),
+
+    // const baseUrl = `https://trimere.site`,
+    const baseUrl = `http://192.168.0.105:8888`,
+        [changeModalVisible, setChangeModalVisible] = useState(false),
+        [profit, setProfit] = useState({...initProfit}),
         [isFetching, setIsFetching] = useState(false),
         [editModalVisible, setEditModalVisible] = useState(false),
         [stonks, setStonks] = useState([]),
@@ -28,7 +37,7 @@ export default function StonksScreen() {
 
         getStonksFromServer = async (): Promise<StonkType[] | void> => {
             return axios
-                .get(`http://192.168.0.105:8888/api/stonk`)
+                .get(`${baseUrl}/api/stonk`)
                 .then(res => {
                     const response = res.data;
                     if (response.status.toUpperCase() != 'OK') {
@@ -58,7 +67,7 @@ export default function StonksScreen() {
             };
             setIsFetching(true);
             return axios
-                .post(`http://192.168.0.105:8888/api/stonk`, qs.stringify(data))
+                .post(`${baseUrl}/api/stonk`, qs.stringify(data))
                 .then(res => {
                     const response = res.data;
                     if (response.status.toUpperCase() != 'OK') {
@@ -68,7 +77,7 @@ export default function StonksScreen() {
                 })
                 .catch((e) => {
                     throw e;
-                }).finally(() =>{
+                }).finally(() => {
                     setIsFetching(false);
                 })
         },
@@ -81,7 +90,7 @@ export default function StonksScreen() {
             }
             setIsFetching(true);
             return axios
-                .put(`http://192.168.0.105:8888/api/stonk/${stonk.id}`, qs.stringify(data))
+                .put(`${baseUrl}/api/stonk/${stonk.id}`, qs.stringify(data))
                 .then(res => {
 
                     const response = res.data;
@@ -92,14 +101,14 @@ export default function StonksScreen() {
                 })
                 .catch((e) => {
                     throw e;
-                }).finally(() =>{
+                }).finally(() => {
                     setIsFetching(false);
                 })
         },
         deleteStonkOnServer = async (stonk: StonkType) => {
             setIsFetching(true);
             return axios
-                .delete(`http://192.168.0.105:8888/api/stonk/${stonk.id}`)
+                .delete(`${baseUrl}/api/stonk/${stonk.id}`)
                 .then(res => {
 
                     const response = res.data;
@@ -110,11 +119,10 @@ export default function StonksScreen() {
                 })
                 .catch((e) => {
                     throw e;
-                }).finally(() =>{
+                }).finally(() => {
                     setIsFetching(false);
                 })
         },
-
         editStonk = (stonk: StonkType) => {
             if (!stonk.title || !stonk.summ) {
                 Alert.alert('Error', `Укажите все данные`);
@@ -180,9 +188,6 @@ export default function StonksScreen() {
             setChangeModalVisible(true);
             changeNewStonk({...initStonk});
         },
-
-
-
         onHoldHandler = (stonk: StonkType) => {
             changeSelectedStonk({...stonk});
             setEditModalVisible(true);
@@ -209,21 +214,40 @@ export default function StonksScreen() {
             setEditModalVisible(false);
             setChangeModalVisible(true);
         };
-    useEffect(() =>{
+
+    useEffect(() => {
         getStonksFromServer().then(stonks => {
             //@ts-ignore
             setStonks(stonks);
         })
     }, []);
-    const ShowedStonks = () => isFetching ? <ActivityIndicator size="large" color="#00ff00" /> : <Stonks stonks={stonks} onHoldHandler={onHoldHandler} isRefreshing={isRefresh} onRefresh={onRefresh}/>;
+
+    useEffect(() => {
+        profit.plus = profit.minus = profit.total = 0;
+        stonks.forEach((stonk: StonkType) => {
+            const summ = stonk.summ;
+            profit.total += summ;
+            if (summ >= 0) {
+                profit.plus += summ
+            } else {
+                profit.minus += summ;
+            }
+            setProfit({...profit});
+        })
+    }, [stonks]);
 
     return (
         <View style={styles.container}>
+            <View style={styles.buttonContainer} onTouchStart={onButtonClick}>
+                <Text style={styles.button}>+</Text>
+            </View>
             <View style={styles.top}>
-                <Text style={styles.title}>Stonks</Text>
-                <Text style={styles.button} onPress={onButtonClick}>+</Text>
+                <Text style={styles.title}>Прибыль за этот месяц:<Text style={styles.plus}>{profit.plus}</Text></Text>
+                <Text style={styles.title}>Убыток за этот месяц:<Text style={styles.minus}>{-profit.minus}</Text></Text>
+                <Text style={styles.title}>Итого:<Text style={styles.total}>{profit.total}</Text></Text>
             </View>
             <ChangeStonkModal stonk={newStonk}
+                              isFetching={isFetching}
                               changeModalVisible={changeModalVisible}
                               setChangeModalVisible={setChangeModalVisible}
                               editStonk={() => {
@@ -234,17 +258,15 @@ export default function StonksScreen() {
                             setModalVisible={setEditModalVisible}
                             editStonk={setupEditStonk}
                             deleteStonk={deleteStonk}/>
-
-            <ShowedStonks />
+            <Stonks stonks={stonks} onHoldHandler={onHoldHandler} isRefreshing={isRefresh} onRefresh={onRefresh}/>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     top: {
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexDirection: "row",
+        justifyContent: "center",
+        flexDirection: "column",
         width: "100%",
         padding: 10,
         paddingBottom: 20,
@@ -257,8 +279,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     title: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        fontSize: 15,
+        fontWeight: 'normal',
+        marginTop: 5,
     },
     separator: {
         marginVertical: 30,
@@ -268,18 +291,41 @@ const styles = StyleSheet.create({
     input: {
         color: "#fff",
         paddingBottom: 10,
-
         borderBottomColor: "yellow",
         borderStyle: "solid",
         borderStartWidth: 1,
         width: "100%",
         textAlign: "center",
     },
-    button: {
-        backgroundColor: "grey",
+    buttonContainer: {
+        backgroundColor: "rgb(40,33,33)",
         color: "#fff",
-        fontSize: 20,
         borderRadius: 40,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
         padding: 5,
+        width: 50,
+        height: 55,
+        alignItems: "center",
+        justifyContent: "center",
+        position: "absolute",
+        bottom: -15,
+        zIndex: 2
     },
+    button: {
+        fontSize: 20,
+    },
+    plus:{
+        fontSize: 20,
+        color:"green",
+    },
+    minus:{
+        fontSize: 20,
+        color:"red",
+    },
+    total:{
+        fontSize: 20,
+        color:"grey",
+    }
+
 });
