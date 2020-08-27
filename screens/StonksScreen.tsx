@@ -1,12 +1,13 @@
 import * as React from 'react';
 import {useState} from 'react';
-import {Alert, StyleSheet} from 'react-native';
+import {ActivityIndicator, Alert, StyleSheet} from 'react-native';
 import {Text, View} from '../components/Themed';
 import Stonks from "../components/Stonks/Stonks";
 import ChangeStonkModal from "../components/Stonks/ChangeStonkModal";
 import {StonkType} from "../types";
 import EditStonkModal from "../components/Stonks/EditStonkModal";
 import axios from 'axios';
+import qs from "qs";
 
 export default function StonksScreen() {
     const initStonk = {
@@ -62,12 +63,93 @@ export default function StonksScreen() {
         ]
 
     const [changeModalVisible, setChangeModalVisible] = useState(false),
+        [isFetching, setIsFetching] = useState(false),
         [editModalVisible, setEditModalVisible] = useState(false),
         [stonks, setStonks] = useState(initStonks),
         [newStonk, changeNewStonk] = useState({...initStonk}),
         [selectedStonk, changeSelectedStonk] = useState({...initStonk}),
         [isRefresh, setIsRefresh] = useState(false),
 
+        getStonksFromServer = async (): Promise<StonkType[] | void> => {
+            return axios
+                .get(`http://192.168.0.105:8888/api/stonk`)
+                .then(res => {
+                    const response = res.data;
+                    if (response.status.toUpperCase() != 'OK') {
+                        return Alert.alert(`Ошибка`, response.error_msg);
+                    }
+                    const rawStonks = response.data;
+                    const stonks: StonkType[] = [];
+                    for (const i in rawStonks) {
+                        const rawStonk = rawStonks[i];
+                        const {id, description, title, created_at, summ} = rawStonk;
+                        const stonk: StonkType = {
+                            id, description, title, created_at, summ
+                        }
+                        stonks.push(stonk);
+                    }
+
+                    return stonks;
+                })
+                .catch((e) => {
+                    throw e;
+                })
+
+        },
+        addStonkToServer = async (stonk: StonkType) => {
+            const data = {
+                stonk
+            };
+            return axios
+                .post(`http://192.168.0.105:8888/api/stonk`, qs.stringify(data))
+                .then(res => {
+                    const response = res.data;
+                    if (response.status.toUpperCase() != 'OK') {
+                        throw response.error_msg;
+                    }
+                    return true;
+                })
+                .catch((e) => {
+                    throw e;
+                })
+        },
+        editStonkOnServer = async (stonk: StonkType) => {
+            const data = {
+                stonk
+            };
+            if (!stonk.id) {
+                throw `Произошла внутренняя ошибка`;
+            }
+
+            return axios
+                .put(`http://192.168.0.105:8888/api/stonk/${stonk.id}`, qs.stringify(data))
+                .then(res => {
+
+                    const response = res.data;
+                    if (response.status.toUpperCase() != 'OK') {
+                        throw response.error_msg;
+                    }
+                    return true;
+                })
+                .catch((e) => {
+                    throw e;
+                })
+        },
+        deleteStonkOnServer = async (stonk: StonkType) => {
+            return axios
+                .delete(`http://192.168.0.105:8888/api/stonk/${stonk.id}`)
+                .then(res => {
+
+                    const response = res.data;
+                    if (response.status.toUpperCase() != 'OK') {
+                        throw response.error_msg;
+                    }
+                    return true;
+                })
+                .catch((e) => {
+                    throw e;
+                })
+        },
 
         editStonk = (stonk: StonkType) => {
             if (!stonk.title || !stonk.summ) {
@@ -77,46 +159,94 @@ export default function StonksScreen() {
             if (!stonk.id) {
                 changeNewStonk(newStonk);
                 // @ts-ignore
-                setStonks([...stonks, newStonk])
-                changeNewStonk({...initStonk});
+                addStonkToServer(stonk)
+                    .then(e => {
+                        return getStonksFromServer().then(stonks => {
+                            // @ts-ignore
+                            setStonks(stonks);
+                            changeNewStonk({...initStonk});
+                        })
+
+                    })
+                    .catch(e => {
+                        Alert.alert(`Ошибка`, e);
+                    })
+                    .finally(() => {
+                        setChangeModalVisible(false);
+                    });
+
+            } else {
+                editStonkOnServer(stonk)
+                    .then(e => {
+                        return getStonksFromServer().then(stonks => {
+                            // @ts-ignore
+                            setStonks(stonks);
+                            changeNewStonk({...initStonk});
+                        })
+
+                    })
+                    .catch(e => {
+                        console.log(e);
+                    })
+                    .finally(() => {
+                        setChangeModalVisible(false);
+                    });
             }
-            setChangeModalVisible(false);
+
+        },
+        deleteStonk = () => {
+            deleteStonkOnServer(selectedStonk)
+                .then(e => {
+                    return getStonksFromServer().then(stonks => {
+                        // @ts-ignore
+                        setStonks(stonks);
+                        changeSelectedStonk({...initStonk});
+                    })
+
+                })
+                .catch(e => {
+                    console.log(e);
+                })
+                .finally(() => {
+                    setEditModalVisible(false);
+                });
+
         },
         onButtonClick = () => {
             setChangeModalVisible(true);
             changeNewStonk({...initStonk});
         },
-        setupEditStonk = () => {
-            changeNewStonk(selectedStonk);
-            setEditModalVisible(false);
-            setChangeModalVisible(true);
-        },
-        deleteStonk = () => {
-            const newStonks = stonks.filter(e => e.id != selectedStonk.id);
-            setStonks([...newStonks]);
-            setEditModalVisible(false);
-        },
+
+
+
         onHoldHandler = (stonk: StonkType) => {
             changeSelectedStonk({...stonk});
             setEditModalVisible(true);
         },
         onRefresh = () => {
             setIsRefresh(true);
-            // setStonks([]);
-            // setStonks([stonks[0],...stonks]);
-            axios
-                .get(`https://trimere.site`)
-                .then(response => {
-                    console.log(response)
-                })
+
+            getStonksFromServer()
+                // @ts-ignore
+                .then((stonks) => setStonks(stonks))
                 .catch(e => {
-                    Alert.alert(`Ошибка`, `Проверьте подключение к интернету`);
+                    if (e.message.toLowerCase() == `network error`) {
+                        return Alert.alert(`Ошибка`, `Проверьте подключение к интернету`);
+                    } else {
+                        return Alert.alert(`Ошибка`, e.message);
+                    }
                 })
                 .finally(() => {
                     setIsRefresh(false);
                 });
-
+        },
+        setupEditStonk = () => {
+            changeNewStonk(selectedStonk);
+            setEditModalVisible(false);
+            setChangeModalVisible(true);
         };
+
+    const ShowedStonks = () => isFetching ? <ActivityIndicator size="large" color="#00ff00" /> : <Stonks stonks={stonks} onHoldHandler={onHoldHandler} isRefreshing={isRefresh} onRefresh={onRefresh}/>;
 
     return (
         <View style={styles.container}>
@@ -135,7 +265,8 @@ export default function StonksScreen() {
                             setModalVisible={setEditModalVisible}
                             editStonk={setupEditStonk}
                             deleteStonk={deleteStonk}/>
-            <Stonks stonks={stonks} onHoldHandler={onHoldHandler} isRefreshing={isRefresh} onRefresh={onRefresh}/>
+
+            <ShowedStonks />
         </View>
     );
 }

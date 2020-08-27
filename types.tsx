@@ -22,8 +22,3 @@ export type StonkType = {
     summ: number,
     created_at: string
 };
-export type ModalProps = {
-    isOpen: boolean;
-    children: React.ReactNode;
-    close: () => void;
-};

@@ -12,24 +12,13 @@ type Props = {
 }
 const Stonk = (props: Props) => {
     const {onHoldHandler, stonk} = props;
-    const timeConverter = (UNIX_timestamp: number) => {
-        const a = new Date(UNIX_timestamp * 1000),
-            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            year = a.getFullYear(),
-            month = months[a.getMonth()],
-            date = a.getDate(),
-            hour = a.getHours(),
-            min = a.getMinutes(),
-            sec = a.getSeconds();
-        return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
-    }
     return (
         <TouchableWithoutFeedback onLongPress={() => {
             onHoldHandler(stonk);
         }}>
             <View style={styles.container}>
                 <View style={styles.left}>
-                    <Text style={styles.date}>{timeConverter(+stonk.created_at)}</Text>
+                    <Text style={styles.date}>{stonk.created_at}</Text>
                     <Text style={{...styles.summ, color: stonk.summ >= 0 ? "#24ff00" : "#ff0000"}}>{stonk.summ}</Text>
                 </View>
                 <View style={styles.right}>
