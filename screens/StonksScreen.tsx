@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {ActivityIndicator, Alert, StyleSheet} from 'react-native';
 import {Text, View} from '../components/Themed';
 import Stonks from "../components/Stonks/Stonks";
@@ -16,56 +16,12 @@ export default function StonksScreen() {
             title: '',
             summ: 0,
             created_at: Date.now().toLocaleString()
-        },
-        initStonks = [
-            {
-                id: 1,
-                description: 'Наконец то',
-                title: 'Зарплата',
-                summ: 1220,
-                created_at: Date.now().toLocaleString()
-            },
-            {
-                id: 2,
-                description: 'Почему бы и нет?',
-                title: 'Купил шавуху',
-                summ: -122011,
-                created_at: Date.now().toLocaleString()
-            },
-            {
-                id: 3,
-                description: 'Почему бы и нет?',
-                title: 'Купил шавуху',
-                summ: -122011,
-                created_at: Date.now().toLocaleString()
-            },
-            {
-                id: 4,
-                description: 'Почему бы и нет?',
-                title: 'Купил шавуху',
-                summ: -122011,
-                created_at: Date.now().toLocaleString()
-            },
-            {
-                id: 5,
-                description: 'Почему бы и нет?',
-                title: 'Купил шавуху',
-                summ: -122011,
-                created_at: Date.now().toLocaleString()
-            },
-            {
-                id: 6,
-                description: 'Почему бы и нет?',
-                title: 'Купил шавуху',
-                summ: -122011,
-                created_at: Date.now().toLocaleString()
-            },
-        ]
+        };
 
     const [changeModalVisible, setChangeModalVisible] = useState(false),
         [isFetching, setIsFetching] = useState(false),
         [editModalVisible, setEditModalVisible] = useState(false),
-        [stonks, setStonks] = useState(initStonks),
+        [stonks, setStonks] = useState([]),
         [newStonk, changeNewStonk] = useState({...initStonk}),
         [selectedStonk, changeSelectedStonk] = useState({...initStonk}),
         [isRefresh, setIsRefresh] = useState(false),
@@ -100,6 +56,7 @@ export default function StonksScreen() {
             const data = {
                 stonk
             };
+            setIsFetching(true);
             return axios
                 .post(`http://192.168.0.105:8888/api/stonk`, qs.stringify(data))
                 .then(res => {
@@ -111,6 +68,8 @@ export default function StonksScreen() {
                 })
                 .catch((e) => {
                     throw e;
+                }).finally(() =>{
+                    setIsFetching(false);
                 })
         },
         editStonkOnServer = async (stonk: StonkType) => {
@@ -120,7 +79,7 @@ export default function StonksScreen() {
             if (!stonk.id) {
                 throw `Произошла внутренняя ошибка`;
             }
-
+            setIsFetching(true);
             return axios
                 .put(`http://192.168.0.105:8888/api/stonk/${stonk.id}`, qs.stringify(data))
                 .then(res => {
@@ -133,9 +92,12 @@ export default function StonksScreen() {
                 })
                 .catch((e) => {
                     throw e;
+                }).finally(() =>{
+                    setIsFetching(false);
                 })
         },
         deleteStonkOnServer = async (stonk: StonkType) => {
+            setIsFetching(true);
             return axios
                 .delete(`http://192.168.0.105:8888/api/stonk/${stonk.id}`)
                 .then(res => {
@@ -148,6 +110,8 @@ export default function StonksScreen() {
                 })
                 .catch((e) => {
                     throw e;
+                }).finally(() =>{
+                    setIsFetching(false);
                 })
         },
 
@@ -245,7 +209,12 @@ export default function StonksScreen() {
             setEditModalVisible(false);
             setChangeModalVisible(true);
         };
-
+    useEffect(() =>{
+        getStonksFromServer().then(stonks => {
+            //@ts-ignore
+            setStonks(stonks);
+        })
+    }, []);
     const ShowedStonks = () => isFetching ? <ActivityIndicator size="large" color="#00ff00" /> : <Stonks stonks={stonks} onHoldHandler={onHoldHandler} isRefreshing={isRefresh} onRefresh={onRefresh}/>;
 
     return (
