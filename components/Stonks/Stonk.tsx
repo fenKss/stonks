@@ -1,7 +1,9 @@
 import React from "react";
 import {Image, StyleSheet, Text, TouchableWithoutFeedback, View} from "react-native";
 import {StonkType} from "../../types";
+// @ts-ignore
 import stonkImg from "../../assets/images/stonks.png";
+// @ts-ignore
 import notStonkImg from "../../assets/images/notStonks.png";
 
 type Props = {
@@ -11,16 +13,15 @@ type Props = {
 const Stonk = (props: Props) => {
     const {onHoldHandler, stonk} = props;
     const timeConverter = (UNIX_timestamp: number) => {
-        var a = new Date(UNIX_timestamp * 1000);
-        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        var year = a.getFullYear();
-        var month = months[a.getMonth()];
-        var date = a.getDate();
-        var hour = a.getHours();
-        var min = a.getMinutes();
-        var sec = a.getSeconds();
-        var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
-        return time;
+        const a = new Date(UNIX_timestamp * 1000),
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            year = a.getFullYear(),
+            month = months[a.getMonth()],
+            date = a.getDate(),
+            hour = a.getHours(),
+            min = a.getMinutes(),
+            sec = a.getSeconds();
+        return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
     }
     return (
         <TouchableWithoutFeedback onLongPress={() => {
@@ -45,7 +46,7 @@ const Stonk = (props: Props) => {
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        margin: 10,
+        padding: 10,
         flex: 1,
         justifyContent: "space-between",
         flexDirection: "row",
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         flexDirection: "row",
         alignItems: "center",
-        marginRight: 22,
+        // marginRight: 22,
     },
     title: {
         fontSize: 18,

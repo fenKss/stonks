@@ -12,7 +12,7 @@ const ChangeStonkModal = (props: Props) => {
     let {setChangeModalVisible, changeModalVisible, stonk, editStonk} = props;
     const [title, setTitle] = useState(stonk.title);
     const [description, setDescription] = useState(stonk.description);
-    const [summ, setSumm] = useState(+stonk.summ || '');
+    const [summ, setSumm] = useState(+stonk.summ ?? '');
 
     const onTitleChange = (text: string) => {
         stonk.title = text;
@@ -25,16 +25,19 @@ const ChangeStonkModal = (props: Props) => {
     const onSummChange = (text: string) => {
         let sum = +text;
         if (text === `` || !isNaN(sum)) {
+            // @ts-ignore
             setSumm(text);
             stonk.summ = sum;
         } else if (text === "-") {
             stonk.summ = 0;
+            // @ts-ignore
             setSumm(text);
         }
 
     }
     useEffect(() => {
-        setSumm(stonk.summ);
+        //@ts-ignore
+        setSumm(+stonk.summ || '');
         setDescription(stonk.description);
         setTitle(stonk.title);
     }, [stonk]);
@@ -51,7 +54,7 @@ const ChangeStonkModal = (props: Props) => {
                 }}/>
                 <View style={styles.content}>
                     <View style={styles.top}>
-                        <Text style={styles.title}>Hello World!</Text>
+                        <Text style={styles.title}>{stonk.id ? "Изменить" : "Добавить"} stonk</Text>
                         <TouchableHighlight
                             onPress={() => {
                                 setChangeModalVisible(!changeModalVisible);
@@ -114,11 +117,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        paddingLeft: 10,
-        paddingRight: 10
+        padding: 15,
+        paddingTop: 15
+
     },
     close: {
-        fontSize: 20,
+        fontSize: 25,
         color: "#fff",
     },
     title: {
@@ -134,14 +138,22 @@ const styles = StyleSheet.create({
     titleInput: {
         fontSize: 15,
         padding: 10,
+        paddingBottom: 5,
+        paddingLeft: 5,
         color: "#fff",
-        width: "100%"
+        width: "100%",
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255,255,255,0.2)"
     },
 
     description: {
         color: "#fff",
         padding: 10,
-        width: "100%"
+        paddingBottom: 5,
+        paddingLeft: 5,
+        width: "100%",
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255,255,255,0.2)"
     },
     button: {
         marginTop: 20,

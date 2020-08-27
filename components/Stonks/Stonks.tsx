@@ -8,7 +8,9 @@ type Item = {
 }
 type Props = {
     stonks:StonkType[],
-    onHoldHandler:(stonk:StonkType)=>void
+    onHoldHandler:(stonk:StonkType)=>void,
+    isRefreshing:boolean,
+    onRefresh:()=>void,
 }
 const Stonks = (props: Props) => {
     const renderItem = ((item: Item) => {
@@ -21,6 +23,8 @@ const Stonks = (props: Props) => {
         <FlatList style={styles.stonks}
                   data={props.stonks}
                   renderItem={renderItem}
+                  refreshing={props.isRefreshing}
+                  onRefresh={props.onRefresh}
                  // @ts-ignore
                   keyExtractor={item => item.id}
         />

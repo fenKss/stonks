@@ -14,7 +14,7 @@ const EditStonkModal = (props: Props) => {
     const [myWidth, setWidth] = useState(1);
     const [myHeight, setHeight] = useState(1);
 
-    const onLayout = event => {
+    const onLayout = (event: { nativeEvent: { layout: { width: number; height: number; }; }; }) => {
         const {width, height} = event.nativeEvent.layout;
 
         setWidth(width);
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0,0,0,0.8)"
     },
     content: {
-        padding: 10,
+        padding: 20,
         backgroundColor: "#1d1d1d",
         borderWidth: 1,
         borderTopRightRadius: 8,
@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         padding: 10,
         backgroundColor: "#fff",
+        alignItems:"center"
     }
 });
 
