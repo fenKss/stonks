@@ -6,6 +6,7 @@ import Stonks from "../../components/Stonks/Stonks";
 import ChangeStonkModal from "../../components/Stonks/ChangeStonkModal";
 import {StonksScreenProps, StonkType} from "../../ts/types";
 import EditStonkModal from "../../components/Stonks/EditStonkModal";
+import Logout from "../../components/Logout";
 
 export default function StonksScreen(props: StonksScreenProps) {
 
@@ -67,7 +68,7 @@ export default function StonksScreen(props: StonksScreenProps) {
 
     useEffect(() => {
         profit.plus = profit.minus = profit.total = 0;
-        stonks.forEach((stonk: StonkType) => {
+        stonks && stonks.forEach((stonk: StonkType) => {
             const summ = stonk.summ;
             profit.total += summ;
             if (summ >= 0) {
@@ -78,9 +79,11 @@ export default function StonksScreen(props: StonksScreenProps) {
             setProfit({...profit});
         })
     }, [stonks]);
-
+    //@ts-ignore
+    const {navigation} = props;
     return (
         <View style={styles.container}>
+            <Logout navigation={navigation}/>
             <View style={styles.buttonContainer} onTouchStart={onButtonClick}>
                 <Text style={styles.button}>+</Text>
             </View>

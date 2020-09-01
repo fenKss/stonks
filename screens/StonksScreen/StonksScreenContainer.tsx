@@ -9,12 +9,18 @@ import axios from "axios";
 import qs from "qs";
 import {setNewStonk, setSelectedStonk, setStonks} from "../../redux/StonksReducer";
 
+axios.defaults.withCredentials = true
 class AuthContainer extends React.Component<StonksScreenProps> {
     //baseUrl:string = `https://trimere.site`,
-    baseUrl: string = `http://192.168.0.101:8888`;
+    baseUrl: string = `http://10.76.131.67:8888`;
 
     async componentDidMount() {
-        await this.updateStonks();
+        this.updateStonks()
+            .catch(e => {
+                if (e == `user error`) {
+                    this.props.navigation.replace('Auth');
+                }
+            });
     }
 
     getStonksFromServer = async (): Promise<StonkType[] | void> => {
@@ -40,6 +46,9 @@ class AuthContainer extends React.Component<StonksScreenProps> {
                 return stonks;
             })
             .catch((e) => {
+                if (e == `user error`) {
+                    return this.props.navigation.replace('Auth');
+                }
                 throw e;
             })
 
@@ -59,6 +68,9 @@ class AuthContainer extends React.Component<StonksScreenProps> {
                 return true;
             })
             .catch((e) => {
+                if (e == `user error`) {
+                    return this.props.navigation.replace('Auth');
+                }
                 throw e;
             })
     };
@@ -81,6 +93,9 @@ class AuthContainer extends React.Component<StonksScreenProps> {
                 return true;
             })
             .catch((e) => {
+                if (e == `user error`) {
+                    return this.props.navigation.replace('Auth');
+                }
                 throw e;
             })
     };
@@ -98,6 +113,9 @@ class AuthContainer extends React.Component<StonksScreenProps> {
                 return true;
             })
             .catch((e) => {
+                if (e == `user error`) {
+                    return this.props.navigation.replace('Auth');
+                }
                 throw e;
             }).finally(() => {
                 // setIsFetching(false);
@@ -178,6 +196,7 @@ class AuthContainer extends React.Component<StonksScreenProps> {
             setStonks,
             setNewStonk,
             setSelectedStonk,
+            navigation
         } = this.props;
         const {deleteSelectedStonk, updateStonks, editStonk} = this;
         return (
@@ -190,7 +209,8 @@ class AuthContainer extends React.Component<StonksScreenProps> {
                 newStonk={newStonk}
                 selectedStonk={selectedStonk}
                 setNewStonk={setNewStonk}
-                setSelectedStonk={setSelectedStonk}/>
+                setSelectedStonk={setSelectedStonk}
+                navigation={navigation}/>
         );
     }
 }

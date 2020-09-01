@@ -5,10 +5,10 @@ import {Text, View} from '../../components/Themed';
 import {AuthScreenProps} from "../../ts/types";
 import axios from "axios";
 import qs from "qs";
+import {UserService} from "../../ts/UserService";
 
 export default function AuthScreen(props: AuthScreenProps) {
-    const baseUrl: string = `http://192.168.0.101:8888`;
-    // const baseUrl: string = `http://trimere.site`;
+
     const
         [isAuthed, setIsAuthed] = useState(false),
         [isLoading, setIsLoading] = useState(false),
@@ -18,88 +18,39 @@ export default function AuthScreen(props: AuthScreenProps) {
     //@ts-ignore
     const {navigation} = props;
 
-    const api = {
-        tryAuth: (): Promise<any> => {
-            const data = {
-                user: {
-                    email: login,
-                    password
-                }
-            }
-            return axios
-                .post(`${baseUrl}/api/auth/login`, qs.stringify(data))
-                .then((res) => {
-                    const response = res.data
-                    if (response.status.toUpperCase() != 'OK') {
-                        throw response.error_msg;
-                    }
-                    return true;
-                })
-                .catch((e) => {
-                    throw e;
-                })
-        },
-        checkAuth: (): Promise<any> => {
-            return axios
-                .get(`${baseUrl}/api/auth/base`)
-                .then((res) => {
-                    const response = res.data
-                    if (response.status.toUpperCase() != 'OK') {
-                        throw response.error_msg;
-                    }
-                    const user = response.data.user;
-
-                    return !!user;
-                })
-                .catch((e) => {
-                    throw e;
-                })
-        },
-        logout: (): Promise<any> => {
-            return axios
-                .get(`${baseUrl}/api/auth/logout`)
-                .then((res) => {
-                    const response = res.data
-                    if (response.status.toUpperCase() != 'OK') {
-                        throw response.error_msg;
-                    }
-                    return true
-                })
-                .catch((e) => {
-                    throw e;
-                })
-        }
-    }
-
+    const api = new UserService();
     const firstAuth = () => {
         setIsLoading(true);
         api
             .checkAuth()
             .then(e => {
                 setIsAuthed(e);
+
             })
             .catch(e => {
-                console.log(e);
-            }).finally(() => {
-            setIsLoading(false);
-        });
+                Alert.alert('Ошибка', e.message || e);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }
     useEffect(() => {
         firstAuth();
         // api.logout();
-    });
+    }, []);
     const tryAuth = () => {
         setIsLoading(false);
         api
-            .tryAuth()
-            .then(e => {
+            .tryAuth(login, password)
+            .then(() => {
                 setIsAuthed(true);
             })
             .catch(e => {
-                Alert.alert(`Ошибка`, e);
-            }).finally(() => {
-            setIsLoading(false);
-        });
+                Alert.alert('Ошибка', e.message || e);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }
     // useEffect(() => {
     //     setTimeout(() => {
