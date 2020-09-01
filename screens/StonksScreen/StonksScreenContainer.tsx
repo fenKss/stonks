@@ -8,11 +8,11 @@ import {State, StonksScreenProps, StonkType} from '../../ts/types';
 import axios from "axios";
 import qs from "qs";
 import {setNewStonk, setSelectedStonk, setStonks} from "../../redux/StonksReducer";
+import {GetBaseUrl} from "../../ts/UserService";
 
 axios.defaults.withCredentials = true
 class AuthContainer extends React.Component<StonksScreenProps> {
-    //baseUrl:string = `https://trimere.site`,
-    baseUrl: string = `http://10.76.131.67:8888`;
+    baseUrl: string = GetBaseUrl();
 
     async componentDidMount() {
         this.updateStonks()

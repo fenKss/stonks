@@ -5,8 +5,7 @@ export class UserService {
     constructor() {
         axios.defaults.withCredentials = true
     }
-    baseUrl: string = `http://10.76.131.67:8888`;
-    // const this.baseUrl: string = `http://trimere.site`;
+    baseUrl: string = GetBaseUrl();
     tryAuth = (email: string, password: string): Promise<any> => {
         const data = {
             user: {
@@ -57,4 +56,8 @@ export class UserService {
                 throw e;
             })
     }
+}
+export const GetBaseUrl = () => {
+    return `http://10.76.131.67:8888`;
+    // return `http://trimere.site`;
 }
