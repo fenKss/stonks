@@ -4,6 +4,9 @@ export type State = {
 export type RootStackParamList = {
     Root: undefined;
     NotFound: undefined;
+    Auth: {
+        a:any
+    };
 };
 
 export type BottomTabParamList = {
@@ -26,6 +29,7 @@ export type StonkType = {
     created_at: string
 };
 export type StonksScreenProps = {
+
     newStonk: StonkType,
     selectedStonk: StonkType,
     stonks: StonkType[],
@@ -36,3 +40,9 @@ export type StonksScreenProps = {
     setNewStonk: (stonk:StonkType) => void,
     setSelectedStonk: (stonk:StonkType) => void,
 };
+
+export type AuthScreenProps = {
+    login:string,
+    password:string,
+    isAuthed:boolean
+}
