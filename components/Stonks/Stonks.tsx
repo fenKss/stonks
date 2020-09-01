@@ -1,7 +1,7 @@
 import Stonk from "./Stonk";
 import {FlatList, StyleSheet} from "react-native";
 import * as React from "react";
-import {StonkType} from "../../types";
+import {StonkType} from "../../ts/types";
 
 type Item = {
     item: StonkType

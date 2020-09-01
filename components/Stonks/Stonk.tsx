@@ -1,6 +1,6 @@
 import React from "react";
 import {Image, StyleSheet, Text, TouchableWithoutFeedback, View} from "react-native";
-import {StonkType} from "../../types";
+import {StonkType} from "../../ts/types";
 // @ts-ignore
 import stonkImg from "../../assets/images/stonks.png";
 // @ts-ignore
@@ -61,13 +61,14 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         flexDirection: "row",
         alignItems: "center",
-        // marginRight: 22,
+        marginLeft: 22,
     },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
         color: "#fff",
         marginRight: 20,
+        textAlign:"right",
     },
     img: {
         width: 100,
@@ -77,6 +78,7 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 8,
         color: "#fff",
+        textAlign:"right",
 
     }
 });

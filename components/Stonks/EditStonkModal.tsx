@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {View, Text, StyleSheet, Modal, Alert, TouchableHighlight, TextInput} from "react-native";
-import {StonkType} from "../../types";
+import {StonkType} from "../../ts/types";
 
 type Props = {
     modalVisible: boolean,
@@ -13,7 +13,6 @@ const EditStonkModal = (props: Props) => {
     let {setModalVisible, modalVisible, editStonk, deleteStonk, stonk} = props;
     const [myWidth, setWidth] = useState(1);
     const [myHeight, setHeight] = useState(1);
-
     const onLayout = (event: { nativeEvent: { layout: { width: number; height: number; }; }; }) => {
         const {width, height} = event.nativeEvent.layout;
 

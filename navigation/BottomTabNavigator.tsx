@@ -5,9 +5,10 @@ import * as React from 'react';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
-import StonksScreen from '../screens/StonksScreen';
+import StonksScreen from '../screens/StonksScreen/StonksScreen';
 import DebtsScreen from '../screens/DebtsScreen';
-import { BottomTabParamList, TabOneParamList, TabTwoParamList } from '../types';
+import { BottomTabParamList, TabOneParamList, TabTwoParamList } from '../ts/types';
+import StonksScreenContainer from "../screens/StonksScreen/StonksScreenContainer";
 
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -51,7 +52,7 @@ function TabOneNavigator() {
     <TabOneStack.Navigator>
       <TabOneStack.Screen
         name="Stonks"
-        component={StonksScreen}
+        component={StonksScreenContainer}
         options={{ headerTitle: 'Stonks' }}
       />
     </TabOneStack.Navigator>
