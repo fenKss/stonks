@@ -4,29 +4,34 @@ import React from 'react';
 import {connect} from 'react-redux';
 import StonksScreen from "./StonksScreen";
 
-import {State, StonksScreenProps, StonkType} from '../../ts/types';
+import {State, StonksScreenProps, StonkType, TOKEN_HEADER, TOKEN_STORAGE} from '../../ts/types';
 import axios from "axios";
 import qs from "qs";
 import {setNewStonk, setSelectedStonk, setStonks} from "../../redux/StonksReducer";
 import {GetBaseUrl} from "../../ts/UserService";
+import {AsyncStorage} from "react-native";
 
-axios.defaults.withCredentials = true
 class AuthContainer extends React.Component<StonksScreenProps> {
-    baseUrl: string = GetBaseUrl();
+    readonly baseUrl: string = GetBaseUrl();
 
     async componentDidMount() {
         this.updateStonks()
             .catch(e => {
                 if (e == `user error`) {
-                    this.props.navigation.replace('Auth');
+                    return this.props.navigation.replace('Auth');
                 }
             });
     }
 
     getStonksFromServer = async (): Promise<StonkType[] | void> => {
         const {baseUrl} = this;
+        const token = await AsyncStorage.getItem(TOKEN_STORAGE);
         return axios
-            .get(`${baseUrl}/api/stonk`)
+            .get(`${baseUrl}/api/stonk`, {
+                headers: {
+                    [TOKEN_HEADER]: token
+                }
+            })
             .then(res => {
                 const response = res.data;
                 if (response.status.toUpperCase() != 'OK') {
@@ -58,8 +63,13 @@ class AuthContainer extends React.Component<StonksScreenProps> {
             stonk
         };
         const {baseUrl} = this;
+        const token = await AsyncStorage.getItem(TOKEN_STORAGE);
         return axios
-            .post(`${baseUrl}/api/stonk`, qs.stringify(data))
+            .post(`${baseUrl}/api/stonk`, qs.stringify(data), {
+                headers: {
+                    [TOKEN_HEADER]: token
+                }
+            })
             .then(res => {
                 const response = res.data;
                 if (response.status.toUpperCase() != 'OK') {
@@ -82,9 +92,13 @@ class AuthContainer extends React.Component<StonksScreenProps> {
         if (!stonk.id) {
             throw `Произошла внутренняя ошибка`;
         }
-        // setIsFetching(true);
+        const token = await AsyncStorage.getItem(TOKEN_STORAGE);
         return axios
-            .put(`${baseUrl}/api/stonk/${stonk.id}`, qs.stringify(data))
+            .put(`${baseUrl}/api/stonk/${stonk.id}`, qs.stringify(data), {
+                headers: {
+                    [TOKEN_HEADER]: token
+                }
+            })
             .then(res => {
                 const response = res.data;
                 if (response.status.toUpperCase() != 'OK') {
@@ -100,10 +114,14 @@ class AuthContainer extends React.Component<StonksScreenProps> {
             })
     };
     deleteStonkOnServer = async (stonk: StonkType) => {
-        // setIsFetching(true);
+        const token = await AsyncStorage.getItem(TOKEN_STORAGE);
         const {baseUrl} = this;
         return axios
-            .delete(`${baseUrl}/api/stonk/${stonk.id}`)
+            .delete(`${baseUrl}/api/stonk/${stonk.id}`, {
+                headers: {
+                    [TOKEN_HEADER]: token
+                }
+            })
             .then(res => {
 
                 const response = res.data;
@@ -132,13 +150,14 @@ class AuthContainer extends React.Component<StonksScreenProps> {
             // @ts-ignore
             return addStonkToServer(stonk)
                 .then(() => {
-                    return this.getStonksFromServer().then(stonks => {
-                        // @ts-ignore
-                        setStonks(stonks);
-                        // changeNewStonk({...initStonk});
-                    }).catch((e: any) => {
-                        throw e;
-                    })
+                    return this
+                        .getStonksFromServer()
+                        .then(stonks => {
+                            // @ts-ignore
+                            setStonks(stonks);
+                        }).catch((e: any) => {
+                            throw e;
+                        })
 
                 })
                 .catch((e: any) => {
@@ -180,12 +199,15 @@ class AuthContainer extends React.Component<StonksScreenProps> {
     };
     updateStonks = (): Promise<any> => {
         const {setStonks} = this.props;
-        // @ts-ignore
-        return this.getStonksFromServer().then((stonks: StonkType[]) => {
-            setStonks(stonks);
-        }).catch((e) => {
-            throw e
-        });
+
+        return this
+            .getStonksFromServer()
+            // @ts-ignore
+            .then((stonks: StonkType[]) => {
+                return setStonks(stonks);
+            }).catch((e) => {
+                throw e
+            });
     };
 
     render() {

@@ -1,11 +1,14 @@
 import axios from "axios";
 import qs from "qs";
+import {TOKEN_HEADER, TOKEN_STORAGE} from "./types";
+import {AsyncStorage} from "react-native";
+
 
 export class UserService {
     constructor() {
-        axios.defaults.withCredentials = true
+        axios.defaults.withCredentials = true;
     }
-    baseUrl: string = GetBaseUrl();
+    readonly baseUrl: string = GetBaseUrl();
     tryAuth = (email: string, password: string): Promise<any> => {
         const data = {
             user: {
@@ -16,19 +19,30 @@ export class UserService {
         return axios
             .post(`${this.baseUrl}/api/auth/login`, qs.stringify(data))
             .then((res) => {
-                const response = res.data
-                if (response.status.toUpperCase() != 'OK') {
-                    throw response.error_msg;
+                const response = res.data;
+                const status = response.status ? response.status.toUpperCase() : null;
+                if (status != 'OK') {
+                    const error = response.error_msg || null;
+                    if (error){
+                        throw error;
+                    }
                 }
-                return true;
+                // return true;
+                const token = response?.data?.token || null;
+                return token;
             })
             .catch((e) => {
                 throw e;
             })
     };
-    checkAuth = (): Promise<any> => {
+    checkAuth = async (): Promise<any> => {
+        const token = await AsyncStorage.getItem(TOKEN_STORAGE);
         return axios
-            .get(`${this.baseUrl}/api/auth/base`)
+            .get(`${this.baseUrl}/api/auth/base`, {
+                headers:{
+                    [TOKEN_HEADER]:token
+                }
+            })
             .then((res) => {
                 const response = res.data
                 if (response.status.toUpperCase() != 'OK') {
@@ -42,14 +56,21 @@ export class UserService {
                 throw e;
             })
     };
-    logout = (): Promise<any> => {
+    logout = async (): Promise<any> => {
+        const token = await AsyncStorage.getItem(TOKEN_STORAGE);
+
         return axios
-            .get(`${this.baseUrl}/api/auth/logout`)
-            .then((res) => {
+            .get(`${this.baseUrl}/api/auth/logout`, {
+                headers: {
+                    [TOKEN_HEADER]: token
+                }
+            })
+            .then(async (res) => {
                 const response = res.data
                 if (response.status.toUpperCase() != 'OK') {
                     throw response.error_msg;
                 }
+                await AsyncStorage.removeItem(TOKEN_STORAGE);
                 return true
             })
             .catch((e) => {
@@ -57,7 +78,7 @@ export class UserService {
             })
     }
 }
-export const GetBaseUrl = () => {
-    return `http://10.76.131.67:8888`;
-    // return `http://trimere.site`;
+export const GetBaseUrl = (): string => {
+    // return `http://10.76.131.67:8888`;
+    return `https://trimere.site`;
 }

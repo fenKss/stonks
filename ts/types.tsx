@@ -44,3 +44,5 @@ export type AuthScreenProps = {
     password:string,
     isAuthed:boolean
 }
+export const TOKEN_HEADER = "X-AUTH-TOKEN";
+export const TOKEN_STORAGE = "stonksAuthToken";

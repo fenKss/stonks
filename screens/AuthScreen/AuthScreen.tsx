@@ -1,10 +1,8 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
+import {ActivityIndicator, Alert, AsyncStorage, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
 import {Text, View} from '../../components/Themed';
-import {AuthScreenProps} from "../../ts/types";
-import axios from "axios";
-import qs from "qs";
+import {AuthScreenProps, TOKEN_STORAGE} from "../../ts/types";
 import {UserService} from "../../ts/UserService";
 
 export default function AuthScreen(props: AuthScreenProps) {
@@ -17,15 +15,13 @@ export default function AuthScreen(props: AuthScreenProps) {
 
     //@ts-ignore
     const {navigation} = props;
-
     const api = new UserService();
     const firstAuth = () => {
         setIsLoading(true);
         api
             .checkAuth()
-            .then(e => {
+            .then(async e => {
                 setIsAuthed(e);
-
             })
             .catch(e => {
                 Alert.alert('Ошибка', e.message || e);
@@ -42,10 +38,14 @@ export default function AuthScreen(props: AuthScreenProps) {
         setIsLoading(false);
         api
             .tryAuth(login, password)
-            .then(() => {
-                setIsAuthed(true);
+            .then(async (token) => {
+                AsyncStorage.setItem(TOKEN_STORAGE, token).then(() => {
+                    setIsAuthed(true);
+                });
+
             })
-            .catch(e => {
+            .catch(async e => {
+                await AsyncStorage.removeItem(TOKEN_STORAGE);
                 Alert.alert('Ошибка', e.message || e);
             })
             .finally(() => {
@@ -80,6 +80,8 @@ export default function AuthScreen(props: AuthScreenProps) {
                                placeholder={`Your username or email`}
                                value={login}
                                onChangeText={(text) => setLogin(text)}
+                               textContentType={"emailAddress"}
+                               keyboardType={`email-address`}
                     />
                 </View>
                 <View style={styles.formGroup}>
@@ -93,8 +95,13 @@ export default function AuthScreen(props: AuthScreenProps) {
                     />
                 </View>
                 <View style={styles.buttons}>
-                    <TouchableOpacity activeOpacity={0.8} onPress={tryAuth}
-                                      style={styles.button}><Text>Enter</Text></TouchableOpacity>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={tryAuth}
+                        style={styles.button}
+                    >
+                        <Text>Enter</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </View>
